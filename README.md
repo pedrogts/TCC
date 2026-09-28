@@ -9,9 +9,9 @@ Trabalho de Conclusão de Curso — Análise comparativa de desempenho dos algor
 - [Pré-requisitos](#pré-requisitos)
 - [Arquivos de Entrada](#arquivos-de-entrada)
 - [Como Executar](#como-executar)
-  - [C](#c)
-  - [Python](#python)
-  - [Java](#java)
+    - [C](#c)
+    - [Python](#python)
+    - [Java](#java)
 - [Saídas Geradas](#saídas-geradas)
 - [Métricas Coletadas](#métricas-coletadas)
 
@@ -67,7 +67,7 @@ gcc -O2 -o smoothsort_v3 smoothsort_v3.c
 
 ```bash
 bash benchmark_radix_pior_caso_v3.sh
-bash benchmark_radix_medio_caso_v3.sh
+bash benchmark_radix_par_v4.sh
 bash benchmark_radix_melhor_caso_v3.sh
 bash benchmark_smooth_medio_caso_v3.sh
 bash benchmark_smooth_pior_caso_v3.sh
