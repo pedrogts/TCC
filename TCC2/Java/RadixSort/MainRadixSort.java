@@ -4,7 +4,9 @@ import java.util.*;
 
 public class MainRadixSortParalelo {
 
-    static final String VERSAO = "v3-java";
+    static final String VERSAO = "v4-java";
+    /** -Dradix.aquecimento=1: ordena uma cópia antes (fora do tempo medido) para aquecer o JIT. */
+    static final boolean AQUECIMENTO = Integer.getInteger("radix.aquecimento", 0) != 0;
     static final int MAX_THREADS = 1024;
     static final int TAM_BUF_ES = 1 << 20;
 
@@ -190,10 +192,33 @@ public class MainRadixSortParalelo {
             } catch (OutOfMemoryError e) {
                 throw new ErroPrograma(ERRO_RECURSO, "Erro: falha ao alocar memória para " + quantidade + " números");
             }
+            // Buffer auxiliar do sort: alocado (e zerado) aqui, fora do TEMPO_SORT_S.
+            final double tPrep0 = agora();
+            try {
+                sorter.preparar(quantidade);
+            } catch (RadixSortParalelo.RadixSortException e) {
+                throw new ErroPrograma(ERRO_RECURSO, e.getMessage());
+            }
+            final double tPrep1 = agora();
+
             Checksum ck = new Checksum();
             final double tLeit0 = agora();
             lerEntrada(arquivoEntrada, arr, quantidade, ck);
             final double tLeit1 = agora();
+
+            double tAquec = 0;
+            if (AQUECIMENTO) {
+                final double tAq0 = agora();
+                try {
+                    int[] copia = arr.clone();
+                    sorter.ordenar(copia);
+                } catch (OutOfMemoryError e) {
+                    throw new ErroPrograma(ERRO_RECURSO, "Erro: falha ao alocar memória para o aquecimento");
+                } catch (RadixSortParalelo.RadixSortException e) {
+                    throw new ErroPrograma(ERRO_RECURSO, e.getMessage());
+                }
+                tAquec = agora() - tAq0;
+            }
 
             int passadas;
             final double tSort0 = agora();
@@ -216,6 +241,13 @@ public class MainRadixSortParalelo {
             System.err.printf(Locale.ROOT, "VERSAO=%s%n", VERSAO);
             System.err.printf(Locale.ROOT, "N_THREADS=%d%n", sorter.getNThreads());
             System.err.printf(Locale.ROOT, "N_PASSADAS=%d%n", passadas);
+            System.err.printf(Locale.ROOT, "SPIN_MAX=%d%n", sorter.getSpinMax());
+            System.err.printf(Locale.ROOT, "AQUECIMENTO=%d%n", AQUECIMENTO ? 1 : 0);
+            if (AQUECIMENTO)
+                System.err.printf(Locale.ROOT, "TEMPO_AQUECIMENTO_S=%.9f%n", tAquec);
+            System.err.printf(Locale.ROOT, "TEMPO_PREPARO_S=%.9f%n", tPrep1 - tPrep0);
+            System.err.printf(Locale.ROOT, "TEMPO_BARREIRA_MAX_S=%.9f%n", sorter.getEsperaBarreiraMaxS());
+            System.err.printf(Locale.ROOT, "TEMPO_BARREIRA_MEDIO_S=%.9f%n", sorter.getEsperaBarreiraMediaS());
             System.err.printf(Locale.ROOT, "TEMPO_LEITURA_S=%.9f%n", tLeit1 - tLeit0);
             System.err.printf(Locale.ROOT, "TEMPO_SORT_S=%.9f%n", tSort1 - tSort0);
             System.err.printf(Locale.ROOT, "TEMPO_VERIFICACAO_S=%.9f%n", tVer1 - tVer0);
