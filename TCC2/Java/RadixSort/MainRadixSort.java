@@ -5,7 +5,7 @@ import java.util.*;
 public class MainRadixSortParalelo {
 
     static final String VERSAO = "v4-java";
-    /** -Dradix.aquecimento=1: ordena uma cópia antes (fora do tempo medido) para aquecer o JIT. */
+
     static final boolean AQUECIMENTO = Integer.getInteger("radix.aquecimento", 0) != 0;
     static final int MAX_THREADS = 1024;
     static final int TAM_BUF_ES = 1 << 20;
@@ -192,7 +192,7 @@ public class MainRadixSortParalelo {
             } catch (OutOfMemoryError e) {
                 throw new ErroPrograma(ERRO_RECURSO, "Erro: falha ao alocar memória para " + quantidade + " números");
             }
-            // Buffer auxiliar do sort: alocado (e zerado) aqui, fora do TEMPO_SORT_S.
+
             final double tPrep0 = agora();
             try {
                 sorter.preparar(quantidade);
